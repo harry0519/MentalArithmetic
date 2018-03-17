@@ -31,7 +31,7 @@ def gen_formular(max=20, operator = ['+','-']):
 
 if __name__=='__main__':
 	max = 20
-	count = input("希望训练的数量")
+	count = 60
 
 	flist = gen_formular(max)
 	df = pd.DataFrame(flist, columns=['x','op','y'])

@@ -91,7 +91,7 @@ if __name__=='__main__':
 	overall_end = clock()
 	dfsample = dfsample.sort_index()	
 
-	filename = "emathis2.csv"
+	filename = "emathis.csv"
 	dfsample.to_csv(filename,mode='a',index=False,header=False,columns=['x','op','y','time'])
 
 	show_result(dfsample, clock()-overall_start)

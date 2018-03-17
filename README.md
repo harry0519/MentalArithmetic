@@ -10,3 +10,5 @@ https://www.python.org/downloads/
 
 # 运行
 python emath.py
+
+答题完毕会显示本次答题的时间变化信息及整体, 加法,减法的统计分类信息.

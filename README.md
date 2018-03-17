@@ -36,6 +36,6 @@ python emath.py
 答出后马上按enter进入
 答题完毕会显示本次答题的时间变化信息及整体, 加法,减法的统计分类信息.
 所有历史答题记录会保存在emathis.csv文件中供后续分析
-
+![答题统计图](https://github.com/harry0519/MentalArithmetic/blob/master/Figure_1.png)
 # 其他
 欢迎发送你小孩的成绩文件(emathis.csv),年龄, 性别, 城市给我:harry0519@gmail.com, 用于进一步的统计分析.

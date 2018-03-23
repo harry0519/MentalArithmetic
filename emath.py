@@ -101,6 +101,19 @@ def get_filename():
 
 	return filename, filename_history, debug_mode
 
+def save(answers, test_time):
+	dfhistory = pd.DataFrame(columns=['timestamp','total','mean','max','min','question_num','APM'])
+	dfhistory.loc[0] = [datetime.now(),test_time,
+						answers['time'].mean(),answers['time'].max(),answers['time'].min(),QUESTION_NUM,60.0/answers['time'].mean()]
+
+	withHead = False
+	if os.path.exists(filename) == False:
+		withHead = True
+
+	answers.to_csv(filename,mode='a',index=False,header=(os.path.exists(filename)==False),columns=['timestamp','x','op','y','time'])
+	dfhistory.to_csv(filename_history,mode='a',index=False,header=(os.path.exists(filename_history)==False))
+
+
 if __name__=='__main__':
 	max = 20
 
@@ -135,20 +148,7 @@ if __name__=='__main__':
 		
 	print(dfsample)
 	
-	overall_end = clock()
-	dfsample = dfsample.sort_index()	
-
-	dfhistory = pd.DataFrame(columns=['timestamp','total','mean','max','min','question_num','APM'])
-	dfhistory.loc[0] = [datetime.now(),clock()-overall_start,
-						dfsample['time'].mean(),dfsample['time'].max(),dfsample['time'].min(),QUESTION_NUM,60.0/dfsample['time'].mean()]
-
-	withHead = False
-	if os.path.exists(filename) == False:
-		withHead = True
-
-	dfsample.to_csv(filename,mode='a',index=False,header=(os.path.exists(filename)==False),columns=['timestamp','x','op','y','time'])
-	dfhistory.to_csv(filename_history,mode='a',index=False,header=(os.path.exists(filename_history)==False))
-
-
+	save(dfsample.sort_index(),clock()-overall_start)
+	
 	show_result(dfsample.sort_index(ascending =False), clock()-overall_start)
 

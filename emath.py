@@ -14,7 +14,7 @@ from datetime import datetime
 import argparse
 
 # 单次试题数量. 建议在20-200题之间
-QUESTION_NUM = 10
+QUESTION_NUM = 40
 ANSWERFILE_NAME    = "answers"
 HISTORYFILE_NAME   = "history"
 

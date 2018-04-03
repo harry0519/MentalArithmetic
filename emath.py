@@ -1,7 +1,7 @@
 
 import random
 import os
-from time import time, clock
+from time import time
 from datetime import datetime
 import sys
 import numpy as np
@@ -17,7 +17,12 @@ import argparse
 QUESTION_NUM = 40
 ANSWERFILE_NAME    = "answers"
 HISTORYFILE_NAME   = "history"
-
+def load_font():
+    if(os.name == 'posix'):
+        font = pfm.FontProperties(fname='/Library/Fonts/Songti.ttc')
+    else:
+        font = pfm.FontProperties(fname='C:\Windows\Fonts\simsun.ttc')	
+    return font
 def gen_formular(max=20, operator = ['+','-']):
 
 	flist=[]
@@ -40,7 +45,8 @@ def show_result(answers, total_time):
 		60.0/avg,avg, total_time)
 	print("average = %.2fs, APM = %.2f/min max = %.2fs, min = %.2fs " %(avg,60.0/avg,
 		answers['time'].max(),answers['time'].min()))
-	zhfont1 = pfm.FontProperties(fname='C:\Windows\Fonts\simsun.ttc')	
+	zhfont1 = load_font()
+    
 
 	x = np.arange(1,QUESTION_NUM+1)
 	y = answers['time'].values
@@ -58,7 +64,7 @@ def show_result(answers, total_time):
 
 	# 数据的直方图  
 	plt.subplot(322)  	
-	plt.hist(answers['time'].values, 5, density=False, facecolor='b', cumulative =True)
+	plt.hist(answers['time'].values, 5, facecolor='b', density=True)
 	plt.title("overall")
 	plt.tight_layout()
 
@@ -74,18 +80,6 @@ def show_result(answers, total_time):
 
 	plt.show()
 
-	'''
-	colors = ['red', 'green', 'blue', 'yellow'] 
-	#有向图 
-	DG = nx.DiGraph() 
-	#一次性添加多节点，输入的格式为列表 
-	DG.add_nodes_from(['A', 'B', 'C', 'D']) 
-	#添加边，数据格式为列表 
-	DG.add_edges_from([('A', 'B'), ('A', 'C'), ('A', 'D'), ('D','A')]) 
-	#作图，设置节点名显示,节点大小，节点颜色 
-	nx.draw(DG,with_labels=True, node_size=900, node_color = colors) 
-	plt.show()
-	'''
 def get_filename():
 	parser = argparse.ArgumentParser(description='debug mode')
 	parser.add_argument("-d","--debug", help="print to debug.csv",action="store_true")
@@ -130,25 +124,27 @@ if __name__=='__main__':
 	if debug_mode:
 		print(dfsample)
 
-	input("准备开始答题, 按enter开始")
-	overall_start = clock()
+	i = input("准备开始答题, 按enter开始")
+
+	overall_start = time()
 	cnt = 0
 	for i in dfsample.index:		
 		f = dfsample.loc[i].values
 
-		start = clock()
+		start = time()
 		cnt = cnt + 1
 		question = "{}{}{}".format(f[0],f[1],f[2])
 		input("{}.\t".format(cnt)+question)
 
-		end = clock()
+		end = time()
 		dfsample.loc[i,'time'] = end - start
 		dfsample.loc[i,'question'] = question
 		dfsample.loc[i,'timestamp'] = datetime.now()
 		
 	print(dfsample)
+	overall_end = time()
+    
+	save(dfsample.sort_index(),overall_end-overall_start)
 	
-	save(dfsample.sort_index(),clock()-overall_start)
-	
-	show_result(dfsample.sort_index(ascending =False), clock()-overall_start)
+	show_result(dfsample.sort_index(ascending =False), overall_end-overall_start)
 

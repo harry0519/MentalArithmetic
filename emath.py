@@ -17,27 +17,52 @@ import argparse
 QUESTION_NUM = 40
 ANSWERFILE_NAME    = "answers"
 HISTORYFILE_NAME   = "history"
+
+def generate_question(dataset):
+	print(dataset.head())
+	dataset['question'] = dataset['x'].apply(lambda x:str(x))+dataset['op']+dataset['y'].apply(lambda x:str(x))
+
+
+	gd = dataset.tail(300).groupby(['question'],axis=0).mean()
+	answers = gd.sort_values(by=['time'],ascending=False)
+	answers.reset_index(inplace=True)
+	answers['op'] = '+'
+
+	answers.loc[answers['question'].str.contains('-'),'op'] = "-"
+
+	return answers[['x','op','y']].head(100)
+
 def load_font():
     if(os.name == 'posix'):
         font = pfm.FontProperties(fname='/Library/Fonts/Songti.ttc')
     else:
         font = pfm.FontProperties(fname='C:\Windows\Fonts\simsun.ttc')	
     return font
-def gen_formular(max=20, operator = ['+','-']):
+def gen_formular(max=20, level=0, operator = ['+','-']):
 
-	flist=[]
-	for a in range (1,max+1):
-		for b in range(1,max+1):
-			for o in operator:
-				if o == '+' and a<=3 and b<=3:# 去除10以内加法
-					continue
+	# 如果已经有300题历史记录, 开启动态出题
+	dataset = pd.read_csv("answers.csv",dtype={'x':np.int32,'y':np.int32})
 
-				r = eval("{}{}{}".format(a,o,b))
-				if r>0 and r <= max: #排除结果<=0, >上限的题目
-					f = [a,o,b]
-					flist.append(f)
-	print("%d questions totally generated." %len(flist))
-	return flist
+	if len(dataset)>=300:
+
+		df = generate_question(dataset)
+		print("%d dynamic questions generated." %len(df))
+	else:
+		for a in range (1,max+1):
+			for b in range(1,max+1):
+				for o in operator:
+					if o == '+' and a<=3 and b<=3:# 去除10以内加法
+						continue
+					if a==1 or b==1 or a==10 or b==10: # 去除含1,10的运算
+						continue
+					r = eval("{}{}{}".format(a,o,b))
+					if r>0 and r <= max: #排除结果<=0, >上限的题目
+						f = [a,o,b]
+						flist.append(f)
+		df = pd.DataFrame(flist, columns=['x','op','y'])
+		print("%d questions generated." %len(df))
+
+	return df
 
 def show_result(answers, total_time):
 	avg = answers['time'].mean()
@@ -83,8 +108,11 @@ def show_result(answers, total_time):
 def get_filename():
 	parser = argparse.ArgumentParser(description='debug mode')
 	parser.add_argument("-d","--debug", help="print to debug.csv",action="store_true")
+	#parser.add_argument("level", help="display a square of a given number",type=int)
 	args = parser.parse_args()
 	debug_mode = args.debug
+	#level = args.level
+
 	if debug_mode:
 		print("debug turned on")
 		filename = ANSWERFILE_NAME+"_debug.csv"
@@ -93,7 +121,7 @@ def get_filename():
 		filename = ANSWERFILE_NAME+".csv"
 		filename_history = HISTORYFILE_NAME+".csv"
 
-	return filename, filename_history, debug_mode
+	return filename, filename_history, debug_mode#,level
 
 def save(answers, test_time):
 	dfhistory = pd.DataFrame(columns=['timestamp','total','mean','max','min','question_num','APM'])
@@ -112,11 +140,7 @@ if __name__=='__main__':
 	max = 20
 
 	filename, filename_history, debug_mode = get_filename()
-	flist = gen_formular(max)
-	if debug_mode:
-		print(flist)
-	df = pd.DataFrame(flist, columns=['x','op','y'])
-
+	df = gen_formular(max)
 
 	dfsample = df.sample(n=QUESTION_NUM)
 	dfsample = dfsample.reset_index(drop=True)
@@ -134,7 +158,7 @@ if __name__=='__main__':
 		start = time()
 		cnt = cnt + 1
 		question = "{}{}{}".format(f[0],f[1],f[2])
-		input("{}.\t".format(cnt)+question)
+		input("{}.\t".format(QUESTION_NUM-cnt+1)+question)
 
 		end = time()
 		dfsample.loc[i,'time'] = end - start

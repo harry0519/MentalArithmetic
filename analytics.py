@@ -14,6 +14,13 @@ import pandas as pd
 from datetime import datetime
 import argparse
 
+def load_font():
+    if(os.name == 'posix'):
+        font = pfm.FontProperties(fname='/Library/Fonts/Songti.ttc')
+    else:
+        font = pfm.FontProperties(fname='C:\Windows\Fonts\simsun.ttc')	
+    return font
+
 def draw_network(dataset):
 	G = nx.from_pandas_edgelist(minusset,'x','y',create_using=nx.Graph(),edge_attr=['time'])
 	M = G.number_of_edges()
@@ -50,7 +57,7 @@ def draw_subplot(dataset, pre_title):
 	result = pre_title+"APM={:.2f}/min, 平均:{:.2f}秒, 总时长={:.2f}秒/共{}题".format(
 		60.0/total_average,total_average, total_training_time,total_training_question)
 
-	zhfont1 = pfm.FontProperties(fname='C:\Windows\Fonts\simsun.ttc')		
+	zhfont1 = load_font()#pfm.FontProperties(fname='C:\Windows\Fonts\simsun.ttc')		
 	x = np.arange(1,dataset['time'].count()+1)
 	y = dataset['time'].values
 	plt.plot(x, y,'-',lw=1, alpha=0.7)
@@ -75,10 +82,7 @@ def draw_stat(dataset):
 	dataset = data_process(dataset)	
 	plusset = data_process(plusset)	
 	minusset = data_process(minusset)	
-	#print(dataset)
 
-
-	#answers['question'] =str(answers['x']) + str(answers['op'])+str(answers['y'])
 	plt.subplot(311)	
 	draw_subplot(dataset,"Overall: ")
 
@@ -91,30 +95,15 @@ def draw_stat(dataset):
 	print(dataset[(dataset['outlier']==True) & (dataset['std']>0.0)])
 	filename = "report_"+datetime.now().date().isoformat()+".csv"
 	dataset.to_csv(filename,index=False)
-	'''
-	# 数据的直方图  
-	plt.subplot(322)  	
-	plt.hist(answers['time'].values, 5, density=False, facecolor='b', cumulative =True)
-	plt.title("overall")
-	#plt.tight_layout()
 
-	plt.subplot(324)  	
-	plt.hist(answers.loc[answers['op']=='+']['time'].values, 5, density=True, facecolor='g')
-	plt.title("+",fontproperties=zhfont1)
-	#plt.tight_layout()
-
-	plt.subplot(326)  	
-	plt.hist(answers.loc[answers['op']=='-']['time'].values, 5, density=True, facecolor='g', alpha=0.75)  
-	plt.title("-",fontproperties=zhfont1)
-	#plt.tight_layout()
-	'''
 	plt.show()
 
-dataset = pd.read_csv("data_analysis.csv",dtype={'x':np.int32,'y':np.int32})
+if __name__=='__main__':
+	dataset = pd.read_csv("answers.csv")
 
-#dataset['question'] = dataset['x'].to_string()+dataset['op'].to_string()+dataset['y'].to_string()
-#print(dataset)
-#gb = dataset.groupby(['x','op','y'],axis=0).mean()
-#print(gb)
-draw_stat(dataset)
+	dataset['question'] = dataset['x'].apply(lambda x:str(x))+dataset['op']+dataset['y'].apply(lambda x:str(x))
+	gd = dataset.groupby(['question'],axis=0).mean()
+	print(gd.sort_values(by=['time'],ascending=False))
+
+	draw_stat(dataset)
 

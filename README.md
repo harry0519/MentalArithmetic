@@ -59,6 +59,7 @@ python emath.py
 历史数据分析图
 使用: python analytics.py
 可以创建历史数据分布图.其中趋势线为答题时间变化趋势和20题的平均线.阴影部分为过去20题的标准差区间.如果题目用时超出标准差区间上边界,可以认为需要强化训练; 如果低于下边界,可以认为暂时不需要训练.
+![历史数据分析图](https://github.com/harry0519/MentalArithmetic/blob/master/history.jpg)
 
 # 其他
 欢迎发送你小孩的成绩文件(emathis.csv),年龄, 性别, 城市给我:harry0519@gmail.com, 用于进一步的统计分析.

@@ -18,6 +18,7 @@ QUESTION_NUM = 40
 ANSWERFILE_NAME    = "answers"
 HISTORYFILE_NAME   = "history"
 level = 1
+upper_limit = 20
 
 
 def generate_question(dataset):
@@ -40,7 +41,7 @@ def load_font():
     else:
         font = pfm.FontProperties(fname='C:\Windows\Fonts\simsun.ttc')	
     return font
-def gen_formular(max=20, level=0, operator = ['+','-'],mode='static'):
+def gen_formular(level=0, operator = ['+','-'],mode='static'):
 
 	dataset = pd.read_csv("answers.csv",dtype={'x':np.int32,'y':np.int32})
 
@@ -49,18 +50,18 @@ def gen_formular(max=20, level=0, operator = ['+','-'],mode='static'):
 		print("=====%d dynamic questions generated=====" %len(df))
 	else:
 		flist = []
-		for a in range (1,max+1):
-			for b in range(1,max+1):
+		for a in range (1,upper_limit+1):
+			for b in range(1,upper_limit+1):
 				for o in operator:
 					if level >= 1:
 						if a==1 or b==1 or a==10 or b==10: # 去除含1,10的运算
 							continue
 					r = eval("{}{}{}".format(a,o,b))
-					if r>0 and r <= max: #排除结果<=0, >上限的题目
+					if r>0 and r <= upper_limit: #排除结果<=0, >上限的题目
 						f = [a,o,b]
 						flist.append(f)
 		df = pd.DataFrame(flist, columns=['x','op','y'])
-		print("=====%d random questions generated=====" %len(df))
+		print("=====%d random questions generated[1-%d]=====" %(len(df),upper_limit))
 
 	return df
 
@@ -106,11 +107,15 @@ def show_result(answers, total_time):
 	plt.show()
 
 def get_filename():
+	global upper_limit
 	parser = argparse.ArgumentParser(description='debug mode')
 	parser.add_argument("-d","--debug", help="print to debug.csv",action="store_true")
 	parser.add_argument("-e","--easy",  help="in easy mode, will keep all questions",action="store_true")
+	parser.add_argument('-u', "--upper", help="upper limit of formular", dest="upper",default=20,type=int)
 	args = parser.parse_args()
 	debug_mode = args.debug
+	upper_limit = args.upper 
+
 	if args.easy:
 		level = 0
 
@@ -127,46 +132,41 @@ def get_filename():
 	return filename, filename_history, debug_mode#,level
 
 def save(answers, test_time):
-	dfhistory = pd.DataFrame(columns=['timestamp','total','mean','max','min','question_num','APM'])
+	dfhistory = pd.DataFrame(columns=['timestamp','total','mean','max','min','question_num','APM','upper_limit'])
+	answers['upper_limit'] = upper_limit
 	dfhistory.loc[0] = [datetime.now(),test_time,
-						answers['time'].mean(),answers['time'].max(),answers['time'].min(),QUESTION_NUM,60.0/answers['time'].mean()]
+						answers['time'].mean(),answers['time'].max(),answers['time'].min(),QUESTION_NUM,60.0/answers['time'].mean(),upper_limit]
 
-	withHead = False
-	if os.path.exists(filename) == False:
-		withHead = True
-
-	answers.to_csv(filename,mode='a',index=False,header=(os.path.exists(filename)==False),columns=['timestamp','x','op','y','time'])
+	answers.to_csv(filename,mode='a',index=False,header=(os.path.exists(filename)==False),columns=['timestamp','x','op','y','time','upper_limit'])
 	dfhistory.to_csv(filename_history,mode='a',index=False,header=(os.path.exists(filename_history)==False))
 
 
 if __name__=='__main__':
-	max = 20
 
 	filename, filename_history, debug_mode = get_filename()
 	mode = 'dynamic'
-
-	i = input("准备开始答题, 按enter开始[s]")
-	print(len(i))
-	if i in 'Ss' and len(i)!=0:
-		print(i)
+	hint = "准备开始答题, 按enter开始[s/d]"
+	i = input(hint)
+	if i in 'sS' and len(i)>0:
 		mode = 'static'
+
 	print(mode)
-	df = gen_formular(max,mode=mode)
+	df = gen_formular(mode=mode)
 
 	dfsample = df.sample(n=QUESTION_NUM)
 	dfsample = dfsample.reset_index(drop=True)
 
 	overall_start = time()
-	cnt = 0
+	cnt = 1
 	for i in dfsample.index:		
 		f = dfsample.loc[i].values
+		cnt = cnt + 1
+		question = "{}.\t{}{}{}".format(QUESTION_NUM-cnt, f[0],f[1],f[2])
 
 		start = time()
-		cnt = cnt + 1
-		question = "{}{}{}".format(f[0],f[1],f[2])
-		input("{}.\t".format(QUESTION_NUM-cnt+1)+question)
-
+		input(question)
 		end = time()
+
 		dfsample.loc[i,'time'] = end - start
 		dfsample.loc[i,'question'] = question
 		dfsample.loc[i,'timestamp'] = datetime.now()

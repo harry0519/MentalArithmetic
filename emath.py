@@ -157,14 +157,16 @@ if __name__=='__main__':
 	dfsample = dfsample.reset_index(drop=True)
 
 	overall_start = time()
-	cnt = 1
+	cnt = 0
 	for i in dfsample.index:		
 		f = dfsample.loc[i].values
+
+		question = "{}{}{}".format(f[0],f[1],f[2])
+		full_question = "{}.\t{}".format(QUESTION_NUM-cnt, question)
 		cnt = cnt + 1
-		question = "{}.\t{}{}{}".format(QUESTION_NUM-cnt, f[0],f[1],f[2])
 
 		start = time()
-		input(question)
+		input(full_question)
 		end = time()
 
 		dfsample.loc[i,'time'] = end - start
@@ -177,4 +179,6 @@ if __name__=='__main__':
 	save(dfsample.sort_index(),overall_end-overall_start)
 	
 	show_result(dfsample.sort_index(ascending =False), overall_end-overall_start)
+	dif = overall_end - overall_start
+	print("overall performance: %.2f APM, total time: %f s" %(60/(dif/40),dif))
 

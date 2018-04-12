@@ -24,12 +24,10 @@ upper_limit = 20
 def generate_question(dataset):
 	dataset['question'] = dataset['x'].apply(lambda x:str(x))+dataset['op']+dataset['y'].apply(lambda x:str(x))
 
-
 	gd = dataset.tail(300).groupby(['question'],axis=0).mean()
 	answers = gd.sort_values(by=['time'],ascending=False)
 	answers.reset_index(inplace=True)
 	answers['op'] = '+'
-
 	answers.loc[answers['question'].str.contains('-'),'op'] = "-"
 
 	return answers[['x','op','y']].head(100)
@@ -132,25 +130,15 @@ def get_filename():
 	return filename, filename_history, debug_mode#,level
 
 def save(answers, test_time):
-	dfhistory = pd.DataFrame(columns=['timestamp','total','mean','max','min','question_num','APM','upper_limit'])
-	answers['upper_limit'] = upper_limit
+	dfhistory = pd.DataFrame(columns=['timestamp','total','mean','max','min','question_num','APM'])
+	#answers['upper_limit'] = upper_limit
 	dfhistory.loc[0] = [datetime.now(),test_time,
-						answers['time'].mean(),answers['time'].max(),answers['time'].min(),QUESTION_NUM,60.0/answers['time'].mean(),upper_limit]
+						answers['time'].mean(),answers['time'].max(),answers['time'].min(),QUESTION_NUM,60.0/answers['time'].mean()]
 
-	answers.to_csv(filename,mode='a',index=False,header=(os.path.exists(filename)==False),columns=['timestamp','x','op','y','time','upper_limit'])
+	answers.to_csv(filename,mode='a',index=False,header=(os.path.exists(filename)==False),columns=['timestamp','x','op','y','time'])
 	dfhistory.to_csv(filename_history,mode='a',index=False,header=(os.path.exists(filename_history)==False))
 
-
-if __name__=='__main__':
-
-	filename, filename_history, debug_mode = get_filename()
-	mode = 'dynamic'
-	hint = "准备开始答题, 按enter开始[s/d]"
-	i = input(hint)
-	if i in 'sS' and len(i)>0:
-		mode = 'static'
-
-	print(mode)
+def run(mode='dynamic'):
 	df = gen_formular(mode=mode)
 
 	dfsample = df.sample(n=QUESTION_NUM)
@@ -181,4 +169,16 @@ if __name__=='__main__':
 	show_result(dfsample.sort_index(ascending =False), overall_end-overall_start)
 	dif = overall_end - overall_start
 	print("overall performance: %.2f APM, total time: %f s" %(60/(dif/40),dif))
+	
+if __name__=='__main__':
+
+	filename, filename_history, debug_mode = get_filename()
+	mode = 'dynamic'
+	hint = "准备开始答题, 按enter开始[s/d]"
+	i = input(hint)
+	if i in 'sS' and len(i)>0:
+		mode = 'static'
+
+	run(mode)
+
 

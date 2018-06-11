@@ -2,3 +2,5 @@ numpy
 matplotlib
 networkx
 pandas
+click
+colorama

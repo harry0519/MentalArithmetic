@@ -12,7 +12,7 @@ import networkx as nx
 import pandas as pd 
 
 from datetime import datetime
-import argparse
+import click
 
 def load_font():
     if(os.name == 'posix'):
@@ -98,12 +98,20 @@ def draw_stat(dataset):
 
 	plt.show()
 
-if __name__=='__main__':
-	dataset = pd.read_csv("answers.csv")
-
+@click.command()
+@click.option('--filename', help="file to be analyzed")
+@click.option('--tail', default=1000, help='number of history record will be analyzed')
+def analyze(filename,tail):
+	dataset = pd.read_csv(filename)
+	dataset = dataset.tail(tail)
 	dataset['question'] = dataset['x'].apply(lambda x:str(x))+dataset['op']+dataset['y'].apply(lambda x:str(x))
-	gd = dataset.groupby(['question'],axis=0).mean()
+
+	gd = dataset.groupby(['question'],axis=0).mean()                         
 	print(gd.sort_values(by=['time'],ascending=False))
 
 	draw_stat(dataset)
+
+if __name__=='__main__':
+	analyze()
+
 

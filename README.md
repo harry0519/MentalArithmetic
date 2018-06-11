@@ -50,22 +50,24 @@
 # 运行
 
 默认启动命令, 试题数量为40题，100以内加减法, 用户名为Eason。
+
 `python index.py`
 
 可以通过命令行参数配置. 修改为20以内，单次训练50题，用户名为 Harry
+
 `python index.py --name=harry --amount=50 --ulimit=20`
 
 按enter后开始答题.
 答出后马上按enter表示完成，会连续出题直到结束
 答题完毕会显示本次答题的时间变化信息及整体, 加法,减法的统计分类信息.
 
-![界面](demo/ui.png)
+![界面](demo/ui.jpg)
 答题信息保存在两个文件中
 * 答题详细信息：answers_用户名_范围.csv
 * 答题统计信息：history_用户名_范围.csv
 
 答题完成后统计图表
-![答题统计图](https://github.com/harry0519/MentalArithmetic/blob/master/Figure_1.png)
+![答题统计图](demo/Figure_1.png)
 * 左侧图表为本次答题所有题目详细时间.蓝色线段为本次答题单题时长变化线. 蓝线为本次答题平均时间, 红线为2秒(1分钟30题), 绿线为1秒(1分钟60题).
 * 右侧上部蓝色为整体速度分布.x坐标:时间, y坐标:题目落在区间内的题目数量.
 * 右侧中部/下部绿色柱状图分别为加法和减法的histgram 图
@@ -73,10 +75,11 @@
 
 # 历史数据分析
 答题完成后, 所有历史答题记录会保存在anwser.csv文件中, 统计信息保存在history.csv文件中.
-分析命令
-`python analytics.py`
+分析命令, 其中--filename=history_用户名_范围.csv
+
+`python analytics.py --filename=history_eason_100.csv`
 
 
 可以创建历史数据分布图.其中趋势线为答题时间变化趋势和20题的平均线.阴影部分为过去20题的标准差区间.如果题目用时超出标准差区间上边界,可以认为需要强化训练; 如果低于下边界,可以认为暂时不需要训练.
-![历史数据分析图](https://github.com/harry0519/MentalArithmetic/blob/master/history.jpg)
+![历史数据分析图](demo/history.jpg)
 

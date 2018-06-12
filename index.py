@@ -25,15 +25,25 @@ def generate_dynamic_question(dataset,size=100):
 
 	return answers[['x','op','y']].head(size)
 
-def generate_fullset(op, limit):
+def generate_fullset(op, limit, level):
 	flist = []
 	for a in range (1,limit+1):
 		for b in range(1,limit+1):
 			for o in op:
 				r = eval("{}{}{}".format(a,o,b))
+				
+				
+				if b>10 and limit>20: # 20以上算术题开启难度控制开关
+					if level==1 and b>10: # 难度等级1，排除b>10的题目
+						continue
+					if level==2 and b>10: # 难度等级2，排除b>10 且答案不是10的倍数的题目
+						if r%10!=0:
+							continue
+
 				if r>0 and r <= limit: #排除结果<=0, >上限的题目
 					f = [a,o,b]
 					flist.append(f)
+	print("共生成%d题" %len(flist))
 	df = pd.DataFrame(flist, columns=['x','op','y'])
 	return df
 
@@ -44,10 +54,10 @@ def load_font():
         font = pfm.FontProperties(fname='C:\\Windows\\Fonts\\simsun.ttc')	
     return font
 
-def get_paper(umode, uamount, uname, limit):
+def get_paper(umode, uamount, uname, limit,level):
 	op = ['+','-']	
 	answer_file = "answers_"+str(uname)+"_"+str(limit)+".csv"
-	full_questions = generate_fullset(op, limit)
+	full_questions = generate_fullset(op, limit, level)
 
 	try:
 		if umode == 'd':
@@ -125,19 +135,29 @@ def save(answers, test_time, uname,limit,uamount):
 	answers.to_csv(answer_file,mode='a',index=False,header=(os.path.exists(answer_file)==False),columns=['timestamp','x','op','y','time'])
 	dfhistory.to_csv(history_file,mode='a',index=False,header=(os.path.exists(history_file)==False))
 
-@click.command()
-@click.option('--ulimit', default=100, help='upper limit for your question')
-@click.option('--amount', default=40, help='amount of questions')
-@click.option('--name',   default='eason', help="user name. program will create history for different user name")
-@click.option('--mode',   default='d', help="select paper mode. d=dyanmic, r=random")
+def show_version(ctx,param,value):
+	if not value or ctx.resilient_parsing:
+		return
+	click.echo('小学口算, 2018')
+	click.echo('Version 1.0, harry202@163.com')
+	ctx.exit()
 
-def run(mode, amount, name, ulimit):
-	print("用户名：%s,范围：1-%d,数量=%d,类型=%s" %(name,ulimit,amount,mode))
-	print("----------------------------------")
+@click.command()
+@click.option('--ulimit','-u', default=100, type=click.IntRange(10,1000), help='upper limit for your question')
+@click.option('--amount','-n', default=40, help='amount of questions')
+@click.option('--user', '-u',  default='eason', help="user name. program will create history for different user name")
+@click.option('--mode', '-m',  default='d', type=click.Choice(['d','r']), help="select test mode. d=dyanmic, r=random")
+@click.option('--level', '-l',  default=1, type=click.IntRange(1,3), help="select difficult level, 1,2,3")
+@click.option('--version', '-v', is_flag=True, callback=show_version, expose_value=False, is_eager=True)
+
+def run(mode, amount, user, ulimit, level):
+	print("用户名：%s,范围：1-%d,数量=%d,类型=%s, 难度等级=%d" %(name,ulimit,amount,mode,level))
+	print("----------------------------------------------")
+
+	dfsample = get_paper(mode, amount, user, ulimit,level)	
+
 	hint = "按enter开始答题"
 	level = input(hint)
-
-	dfsample = get_paper(mode, amount, name, ulimit)
 
 	overall_start = time()
 	cnt = 0
@@ -155,15 +175,16 @@ def run(mode, amount, name, ulimit):
 		dfsample.loc[i,'time'] = end - start
 		dfsample.loc[i,'question'] = question
 		dfsample.loc[i,'timestamp'] = datetime.now()
-		
-	print(dfsample)
-	overall_end = time()
-    
-	save(dfsample.sort_index(),overall_end-overall_start, name, ulimit, amount)
 	
-	show_result(dfsample.sort_index(ascending =False), overall_end-overall_start,amount)
-	dif = overall_end - overall_start
-	print("Overall performance: %.2f APM, total time: %f s" %(60/(dif/40),dif))
+	print("=======================答题结果=======================")	
+	print(dfsample)
+	duration = time()-overall_start
+    
+	save(dfsample.sort_index(),duration, user, ulimit, amount)
+	
+	show_result(dfsample.sort_index(ascending =False), duration ,amount)
+
+	print("Overall performance: %.2f APM, total time: %f s" %(60/(duration/40),duration))
 	
 if __name__=='__main__':
 

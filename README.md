@@ -45,7 +45,7 @@
 * 安装第三方依赖库: 
 `pip install -r requirements.txt`
 
-环境配置对于非程序员可能比较困难,如果碰到问题可以在issue留言. 我也尝试了直接出exe包,但是考虑多系统的复杂性,没有计划做二进制发布.等功能晚上后,考虑会移植到微信小程序.
+环境配置对于非程序员可能比较困难,如果碰到问题可以在issue留言。
 
 
 # 运行
@@ -66,19 +66,17 @@
 
 ## 命令行完整参数列表
 
-·
-Usage: index.py [OPTIONS]
-
-Options:
-  -i, --ulimit INTEGER RANGE  upper limit for your question
-  -n, --amount INTEGER        amount of questions
-  -u, --user TEXT             user name. program will create history for
-                              different user name
-  -m, --mode [d|r]            select test mode. d=dyanmic, r=random
-  -l, --level INTEGER RANGE   select difficult level, 1,2,3
-  -v, --version
-  --help                      Show this message and exit.
-·
+` Usage: index.py [OPTIONS]`
+`  `
+`  Options:`
+`  -i, --ulimit INTEGER RANGE  upper limit for your question`
+`  -n, --amount INTEGER        amount of questions`
+`  -u, --user TEXT             user name. program will create history for`
+`                              different user name`
+`  -m, --mode [d|r]            select test mode. d=dyanmic, r=random`
+`  -l, --level INTEGER RANGE   select difficult level, 1,2,3`
+`  -v, --version`
+`  --help                      Show this message and exit. `
 
 ## 难度等级(--level)
 
@@ -92,8 +90,11 @@ Options:
 * APM: Answer Per Minute, 每秒答题数量=总用时/总答题数.
 * max: 最长用时（单题）
 * min: 最短用时（单题）
+
 ## 修改默认参数
+
 如果有一定编程基础，可以修改index.py代码来调整默认参数（不推荐，升级兼容性较差）
+
 具体可以查找：@click.option 后的配置修改。实现使用了click库，可baidu查询语法
 
 
@@ -103,6 +104,7 @@ Options:
 * 答题统计信息：history_用户名_范围.csv
 
 答题完成后统计图表
+
 ![答题统计图](demo/Figure_1.png)
 * 左侧图表为本次答题所有题目详细时间.蓝色线段为本次答题单题时长变化线. 蓝线为本次答题平均时间, 红线为2秒(1分钟30题), 绿线为1秒(1分钟60题).
 * 右侧上部蓝色为整体速度分布.x坐标:时间, y坐标:题目落在区间内的题目数量.

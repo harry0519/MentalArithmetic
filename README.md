@@ -111,9 +111,9 @@ Options:
 
 # 历史数据分析
 答题完成后, 所有历史答题记录会保存在anwser.csv文件中, 统计信息保存在history.csv文件中.
-分析命令, 其中--filename=history_用户名_范围.csv
+分析命令, 其中--filename=answers_用户名_范围.csv
 
-`python analytics.py --filename=history_eason_100.csv`
+`python analytics.py --filename=answers_eason_100.csv`
 
 
 可以创建历史数据分布图.其中趋势线为答题时间变化趋势和20题的平均线.阴影部分为过去20题的标准差区间.如果题目用时超出标准差区间上边界,可以认为需要强化训练; 如果低于下边界,可以认为暂时不需要训练.

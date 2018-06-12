@@ -99,7 +99,7 @@ def draw_stat(dataset):
 	plt.show()
 
 @click.command()
-@click.option('--filename', help="file to be analyzed")
+@click.option('--filename', '-f', default="answers_eason_100.csv", help="file to be analyzed")
 @click.option('--tail', default=1000, help='number of history record will be analyzed')
 def analyze(filename,tail):
 	dataset = pd.read_csv(filename)

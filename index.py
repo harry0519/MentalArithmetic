@@ -143,15 +143,15 @@ def show_version(ctx,param,value):
 	ctx.exit()
 
 @click.command()
-@click.option('--ulimit','-u', default=100, type=click.IntRange(10,1000), help='upper limit for your question')
+@click.option('--ulimit','-i', default=100, type=click.IntRange(10,1000), help='upper limit for your question')
 @click.option('--amount','-n', default=40, help='amount of questions')
 @click.option('--user', '-u',  default='eason', help="user name. program will create history for different user name")
 @click.option('--mode', '-m',  default='d', type=click.Choice(['d','r']), help="select test mode. d=dyanmic, r=random")
-@click.option('--level', '-l',  default=1, type=click.IntRange(1,3), help="select difficult level, 1,2,3")
+@click.option('--level', '-l',  default=2, type=click.IntRange(1,3), help="select difficult level, 1,2,3")
 @click.option('--version', '-v', is_flag=True, callback=show_version, expose_value=False, is_eager=True)
 
 def run(mode, amount, user, ulimit, level):
-	print("用户名：%s,范围：1-%d,数量=%d,类型=%s, 难度等级=%d" %(name,ulimit,amount,mode,level))
+	print("用户名：%s,范围：1-%d,数量=%d,类型=%s, 难度等级=%d" %(user,ulimit,amount,mode,level))
 	print("----------------------------------------------")
 
 	dfsample = get_paper(mode, amount, user, ulimit,level)	

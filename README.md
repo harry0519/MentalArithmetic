@@ -13,7 +13,8 @@
 * 答题完毕后实时生成统计分析结果
 * 可以对历史答题数据记录分析
 * 根据历史答题时间, 动态调整出题频率. 针对性训练不熟练的题
-* 能力分析. 根据测试题记录, 给出口算速度提高的分析报告, 便于平时进行针对性训练.(未实现)
+* 能力分析. 根据测试题记录, 给出口算速度提高的分析报告, 便于平时进行针对性训练
+* 支持多娃家庭，可以每人单独保存历史记录
 
 出题方式（说明以20以内加减法为例，其他口算出题原理类似，暂时不做细节介绍）
 * 随机出题模式
@@ -49,17 +50,52 @@
 
 # 运行
 
-默认启动命令, 试题数量为40题，100以内加减法, 用户名为Eason。
+## 默认启动命令
+
+试题数量为40题，100以内加减法, 用户名为Eason（自己家的，赚个福利）。
 
 `python index.py`
 
 可以通过命令行参数配置. 修改为20以内，单次训练50题，用户名为 Harry
 
-`python index.py --name=harry --amount=50 --ulimit=20`
+`python index.py -u harry -n=50 -i=20`
 
 按enter后开始答题.
 答出后马上按enter表示完成，会连续出题直到结束
 答题完毕会显示本次答题的时间变化信息及整体, 加法,减法的统计分类信息.
+
+## 命令行完整参数列表
+
+·
+Usage: index.py [OPTIONS]
+
+Options:
+  -i, --ulimit INTEGER RANGE  upper limit for your question
+  -n, --amount INTEGER        amount of questions
+  -u, --user TEXT             user name. program will create history for
+                              different user name
+  -m, --mode [d|r]            select test mode. d=dyanmic, r=random
+  -l, --level INTEGER RANGE   select difficult level, 1,2,3
+  -v, --version
+  --help                      Show this message and exit.
+·
+
+## 难度等级(--level)
+
+100以内加减法在小学课本中会分步骤教学，所以提供3个难度等级供渐进学习
+* level=1 中第二个数字控制在1-10
+* level=2 中第二个数字1-10或者答案是10的整数倍(默认)
+* level=3 完整试题
+
+## 主要指标
+
+* APM: Answer Per Minute, 每秒答题数量=总用时/总答题数.
+* max: 最长用时（单题）
+* min: 最短用时（单题）
+## 修改默认参数
+如果有一定编程基础，可以修改index.py代码来调整默认参数（不推荐，升级兼容性较差）
+具体可以查找：@click.option 后的配置修改。实现使用了click库，可baidu查询语法
+
 
 ![界面](demo/ui.jpg)
 答题信息保存在两个文件中

@@ -32,12 +32,15 @@ def generate_fullset(op, limit, level):
 			for o in op:
 				r = eval("{}{}{}".format(a,o,b))
 				
-				
 				if b>10 and limit>20: # 20以上算术题开启难度控制开关
-					if level==1 and b>10: # 难度等级1，排除b>10的题目
+					if level==1 and b>10 and a>10: # 难度等级1，排除b>10的题目
 						continue
-					if level==2 and b>10: # 难度等级2，排除b>10 且答案不是10的倍数的题目
-						if r%10!=0:
+					if level==2: # 难度等级2
+						if a%10 != 0 and b%10!=0 and r%10!=0: #排除a,b,result>10 且答案不是10的倍数的题目
+							if a>10 and b>10:
+								continue
+						if o == '-' and a%10==0 and b>10 and r>10: # 排除a,b>10且a为10的倍数，结果>10的减法，如50-25
+							print(a,o,b)
 							continue
 
 				if r>0 and r <= limit: #排除结果<=0, >上限的题目
